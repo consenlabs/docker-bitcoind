@@ -11,7 +11,7 @@ steps:
   image: plugins/docker
   settings:
     daemon_off: true
-    dockerfile: Dockerfile.bitcoind
+    dockerfile: Dockerfile
     password:
       from_secret: docker-password
     registry: registry.cn-hongkong.aliyuncs.com
@@ -31,7 +31,7 @@ steps:
   image: plugins/docker
   settings:
     daemon_off: true
-    dockerfile: Dockerfile.bitcoind
+    dockerfile: Dockerfile
     password:
       from_secret: docker-password
     registry: registry.cn-hongkong.aliyuncs.com
@@ -49,7 +49,7 @@ steps:
   image: plugins/docker
   settings:
     daemon_off: true
-    dockerfile: Dockerfile.bitcoind
+    dockerfile: Dockerfile
     password:
       from_secret: docker-password
     registry: registry.cn-hongkong.aliyuncs.com
@@ -70,7 +70,7 @@ steps:
   settings:
     auto_tag: true
     daemon_off: true
-    dockerfile: Dockerfile.bitcoind
+    dockerfile: Dockerfile
     password:
       from_secret: docker-password
     registry: registry.cn-hongkong.aliyuncs.com
