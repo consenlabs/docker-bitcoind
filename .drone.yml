@@ -1,6 +1,6 @@
 ---
 kind: pipeline
-name: geth-relay-go
+name: docker-bitcoind
 
 platform:
   os: linux
