@@ -2,7 +2,7 @@
 # Alpine would be nice, but it's linked again musl and breaks the bitcoin core download binary
 #FROM alpine:latest
 
-FROM ubuntu:latest as builder
+FROM ubuntu:20.04 as builder
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
@@ -35,7 +35,7 @@ RUN cd /tmp \
     && /opt/bitcoin/bin/test_bitcoin --show_progress \
     && rm -v /opt/bitcoin/bin/test_bitcoin /opt/bitcoin/bin/bitcoin-qt
 
-FROM ubuntu:latest
+FROM ubuntu:20.04
 LABEL maintainer="Kyle Manna <kyle@kylemanna.com>"
 
 ENTRYPOINT ["docker-entrypoint.sh"]
