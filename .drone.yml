@@ -1,5 +1,5 @@
----
 kind: pipeline
+type: kubernetes
 name: docker-bitcoind
 
 platform:
@@ -8,78 +8,70 @@ platform:
 
 steps:
 - name: publish-on-develop-bitcoind
-  image: plugins/docker
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
   settings:
-    daemon_off: true
     dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind
     tags:
-    - ${DRONE_COMMIT_SHA:0:8}
-    - develop
-    username:
-      from_secret: docker-username
+      - ${DRONE_COMMIT_SHA:0:8}
+      - develop
+    cache_from:
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:develop"
   when:
     branch:
-    - hotfix/*
-    - feature/*
-    - support/*
+      - hotfix/*
+      - feature/*
+      - support/*
 
 - name: publish-on-release-bitcoind
-  image: plugins/docker
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
   settings:
-    daemon_off: true
     dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind
     tags:
-    - ${DRONE_COMMIT_SHA:0:8}
-    - staging
-    username:
-      from_secret: docker-username
+      - ${DRONE_COMMIT_SHA:0:8}
+      - staging
+    cache_from:
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:staging"
   when:
     branch:
-    - release/*
+      - release/*
 
 - name: publish-on-stable-branch-bitcoind
-  image: plugins/docker
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
   settings:
-    daemon_off: true
     dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind
     tags:
-    - ${DRONE_COMMIT_SHA:0:8}
-    - ${DRONE_COMMIT_BRANCH}
-    - ${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}
-    username:
-      from_secret: docker-username
+      - ${DRONE_COMMIT_SHA:0:8}
+      - ${DRONE_COMMIT_BRANCH}
+      - ${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}
+    cache_from:
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:staging"
   when:
     branch:
-    - develop
-    - master
+      - develop
+      - master
 
 - name: publish-on-tag-bitcoind
-  image: plugins/docker
+  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
   settings:
     auto_tag: true
-    daemon_off: true
     dockerfile: Dockerfile
-    password:
-      from_secret: docker-password
-    registry: registry.cn-hongkong.aliyuncs.com
-    repo: registry.cn-hongkong.aliyuncs.com/imtoken/bitcoind
-    username:
-      from_secret: docker-username
+    registry: asia-docker.pkg.dev
+    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind
+    cache_from:
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
+      - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:staging"
   when:
     event:
-    - tag
+      - tag
 
 - name: slack
   image: plugins/slack
