@@ -8,12 +8,13 @@ FROM ubuntu:latest as builder
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
 #    && apk add --update --no-cache gnupg gosu gcompat libgcc
 RUN sed -i -e 's/^APT/# APT/' -e 's/^DPkg/# DPkg/' /etc/apt/apt.conf.d/docker-clean && \
-    apt update && apt install -y --no-install-recommends \
+    apt update \
+    && apt install -y --no-install-recommends \
     ca-certificates \
     gnupg \
     libatomic1 \
     wget \
-    dirmngr \
+    && apt install -y --install-recommends dirmngr \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=24.0.1
