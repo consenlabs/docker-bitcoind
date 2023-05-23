@@ -17,9 +17,9 @@ RUN sed -i -e 's/^APT/# APT/' -e 's/^DPkg/# DPkg/' /etc/apt/apt.conf.d/docker-cl
     && apt install -y --install-recommends dirmngr \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG VERSION=24.0.1
-ARG ARCH=x86_64
-ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
+ENV VERSION=24.0.1
+ENV ARCH=x86_64
+ENV BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 
 # Don't use base image's bitcoin package for a few reasons:
 # 1. Would need to use ppa/latest repo for the latest release.
