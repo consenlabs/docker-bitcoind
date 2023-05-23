@@ -2,7 +2,7 @@
 # Alpine would be nice, but it's linked again musl and breaks the bitcoin core download binary
 #FROM alpine:latest
 
-FROM ubuntu:latest as builder
+FROM ubuntu:22.04 as builder
 
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
