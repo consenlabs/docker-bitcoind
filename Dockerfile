@@ -13,6 +13,7 @@ RUN sed -i -e 's/^APT/# APT/' -e 's/^DPkg/# DPkg/' /etc/apt/apt.conf.d/docker-cl
     gnupg \
     libatomic1 \
     wget \
+    dirmngr \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=24.0
