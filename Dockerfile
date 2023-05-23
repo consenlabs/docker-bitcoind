@@ -26,8 +26,8 @@ ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 # 2. Some package generates /etc/bitcoin.conf on install and that's dangerous to bake in with Docker Hub.
 # 3. Verifying pkg signature from main website should inspire confidence and reduce chance of surprises.
 # Instead fetch, verify, and extract to Docker image
-#RUN gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys ${BITCOIN_CORE_SIGNATURE}
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${BITCOIN_CORE_SIGNATURE}
+RUN gpg --keyserver keyserver.ubuntu.com --recv-keys ${BITCOIN_CORE_SIGNATURE}
+#RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${BITCOIN_CORE_SIGNATURE}
 RUN wget https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS.asc \
         https://bitcoincore.org/bin/bitcoin-core-${VERSION}/SHA256SUMS \
         https://bitcoincore.org/bin/bitcoin-core-${VERSION}/bitcoin-${VERSION}-${ARCH}-linux-gnu.tar.gz \
