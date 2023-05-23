@@ -7,7 +7,7 @@ FROM ubuntu:latest as builder
 # Testing: gosu
 #RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories \
 #    && apk add --update --no-cache gnupg gosu gcompat libgcc
-RUN apt update
+RUN apt purge libappstream3 -y  && apt update
 RUN apt install -y --no-install-recommends ca-certificates wget gnupg && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG VERSION=24.0
