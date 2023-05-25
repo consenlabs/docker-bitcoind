@@ -12,9 +12,10 @@ RUN apt update \
         ca-certificates \
         wget \
         gnupg \
+        libatomic1 \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG VERSION=23.0
+ARG VERSION=24.0.1
 ARG ARCH=x86_64
 ARG BITCOIN_CORE_SIGNATURE=71A3B16735405025D447E8F274810B012346C9A6
 
@@ -52,7 +53,7 @@ RUN groupadd -g ${GROUP_ID} bitcoin \
 COPY --from=builder /opt/ /opt/
 
 RUN apt update \
-    && apt install -y --no-install-recommends gosu \
+    && apt install -y --no-install-recommends gosu libatomic1 \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && ln -sv /opt/bitcoin/bin/* /usr/local/bin
 
