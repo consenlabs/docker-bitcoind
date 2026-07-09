@@ -28,80 +28,232 @@ trigger:
 
 
 steps:
-- name: publish-on-develop-bitcoind
-  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
-  settings:  
-    registry: asia-docker.pkg.dev
-    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind    
-    tags:
-    - ${DRONE_COMMIT_SHA:0:8}
-    - develop
-    cache_from:
-    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BRANCH}"
-    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
-  when:
-    branch:
-    - hotfix/*
-    - feature/*
-    - support/*
+  - name: publish-on-develop-bitcoind
+    image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
+    pull: if-not-exists
+    privileged: true
+    commands:
+      - |-
+        set -eu
 
-- name: publish-on-release-bitcoind
-  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
-  settings:  
-    registry: asia-docker.pkg.dev
-    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind 
-    tags:
-    - ${DRONE_COMMIT_SHA:0:8}
-    - staging
-    cache_from:
-    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BRANCH}"
-    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
-  when:
-    branch:
-    - release/*
+        image='asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind'
+        short_sha="$(printf %s "$DRONE_COMMIT_SHA" | cut -c1-8)"
+        branch="${DRONE_COMMIT_BRANCH:-${DRONE_BRANCH:-}}"
+        tag_name="${DRONE_TAG:-}"
+        source_branch="${DRONE_SOURCE_BRANCH:-}"
+        source_branch_tag="$(printf %s "$source_branch" | tr "/" "-")"
+        names=""
 
-- name: publish-on-stable-branch-bitcoind
-  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
-  settings:
-    registry: asia-docker.pkg.dev
-    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind 
-    tags:
-    - ${DRONE_COMMIT_SHA:0:8}
-    - ${DRONE_COMMIT_BRANCH}
-    - ${DRONE_COMMIT_BRANCH}-${DRONE_COMMIT_SHA:0:8}
-    cache_from:
-    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BRANCH}"
-    - "asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind:${DRONE_COMMIT_BEFORE:0:8}"
-  when:
-    branch:
-    - develop
-    - master
+        add_name() {
+          tag_value="$1"
+          [ -n "$tag_value" ] || return 0
+          names="${names:+$names,}$image:$tag_value"
+        }
 
-- name: publish-on-tag-bitcoind
-  image: asia-docker.pkg.dev/imtoken-210003/imtoken/docker
-  settings:  
-    registry: asia-docker.pkg.dev
-    repo: asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind 
-    tags:
-      - ${DRONE_COMMIT_SHA:0:8}
-      - ${DRONE_TAG}
-  when:
-    event:
-    - tag
+        add_name "$short_sha"
+        add_name "develop"
 
-- name: slack
-  image: plugins/slack
-  settings:
-    template: "{{#if build.pull }}\n*{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}*: <https://github.com/{{ repo.owner }}/{{ repo.name }}/pull/{{ build.pull }}|Pull Request #{{ build.pull }}>\n{{else}}\n*{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)\n{{/if}}\nCommit: {{ build.message.title }}(<https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>)\n{{#if build.tag }}\nTag: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.tag }}|{{ repo.name }} {{ build.tag }}>\n{{else}}\nBranch: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ repo.name }} {{ build.branch }}>\n{{/if}}\nAuthor: {{ build.author }}\n<{{ build.link }}|Visit build page ↗>\n"
-    webhook:
-      from_secret: drone-slack
-  when:
-    status:
-    - success
-    - failure
+        if [ -z "$names" ]; then
+          echo "no image tags resolved" >&2
+          exit 1
+        fi
 
+        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-develop-bitcoind'
 
+        echo "buildkit dockerfile: Dockerfile"
+        echo "buildkit image names: $names"
+        echo "buildkit cache import: $cache_dir"
+        echo "buildkit cache export: $cache_dir"
 
+        mkdir -p "$cache_dir"
+
+        buildctl \
+          build \
+          --progress plain \
+          --frontend dockerfile.v0 \
+          --local context='.' \
+          --local dockerfile=. \
+          --opt filename='Dockerfile' \
+          --import-cache "type=local,src=$cache_dir" \
+          --export-cache "type=local,dest=$cache_dir,mode=max" \
+          --output "type=image,\"name=$names\",push=true"
+    when:
+      branch:
+        - hotfix/*
+        - feature/*
+        - support/*
+
+  - name: publish-on-release-bitcoind
+    image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
+    pull: if-not-exists
+    privileged: true
+    commands:
+      - |-
+        set -eu
+
+        image='asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind'
+        short_sha="$(printf %s "$DRONE_COMMIT_SHA" | cut -c1-8)"
+        branch="${DRONE_COMMIT_BRANCH:-${DRONE_BRANCH:-}}"
+        tag_name="${DRONE_TAG:-}"
+        source_branch="${DRONE_SOURCE_BRANCH:-}"
+        source_branch_tag="$(printf %s "$source_branch" | tr "/" "-")"
+        names=""
+
+        add_name() {
+          tag_value="$1"
+          [ -n "$tag_value" ] || return 0
+          names="${names:+$names,}$image:$tag_value"
+        }
+
+        add_name "$short_sha"
+        add_name "staging"
+
+        if [ -z "$names" ]; then
+          echo "no image tags resolved" >&2
+          exit 1
+        fi
+
+        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-release-bitcoind'
+
+        echo "buildkit dockerfile: Dockerfile"
+        echo "buildkit image names: $names"
+        echo "buildkit cache import: $cache_dir"
+        echo "buildkit cache export: $cache_dir"
+
+        mkdir -p "$cache_dir"
+
+        buildctl \
+          build \
+          --progress plain \
+          --frontend dockerfile.v0 \
+          --local context='.' \
+          --local dockerfile=. \
+          --opt filename='Dockerfile' \
+          --import-cache "type=local,src=$cache_dir" \
+          --export-cache "type=local,dest=$cache_dir,mode=max" \
+          --output "type=image,\"name=$names\",push=true"
+    when:
+      branch:
+        - release/*
+
+  - name: publish-on-stable-branch-bitcoind
+    image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
+    pull: if-not-exists
+    privileged: true
+    commands:
+      - |-
+        set -eu
+
+        image='asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind'
+        short_sha="$(printf %s "$DRONE_COMMIT_SHA" | cut -c1-8)"
+        branch="${DRONE_COMMIT_BRANCH:-${DRONE_BRANCH:-}}"
+        tag_name="${DRONE_TAG:-}"
+        source_branch="${DRONE_SOURCE_BRANCH:-}"
+        source_branch_tag="$(printf %s "$source_branch" | tr "/" "-")"
+        names=""
+
+        add_name() {
+          tag_value="$1"
+          [ -n "$tag_value" ] || return 0
+          names="${names:+$names,}$image:$tag_value"
+        }
+
+        add_name "$short_sha"
+        add_name "$branch"
+        add_name "$branch-$short_sha"
+
+        if [ -z "$names" ]; then
+          echo "no image tags resolved" >&2
+          exit 1
+        fi
+
+        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-stable-branch-bitcoind'
+
+        echo "buildkit dockerfile: Dockerfile"
+        echo "buildkit image names: $names"
+        echo "buildkit cache import: $cache_dir"
+        echo "buildkit cache export: $cache_dir"
+
+        mkdir -p "$cache_dir"
+
+        buildctl \
+          build \
+          --progress plain \
+          --frontend dockerfile.v0 \
+          --local context='.' \
+          --local dockerfile=. \
+          --opt filename='Dockerfile' \
+          --import-cache "type=local,src=$cache_dir" \
+          --export-cache "type=local,dest=$cache_dir,mode=max" \
+          --output "type=image,\"name=$names\",push=true"
+    when:
+      branch:
+        - develop
+        - master
+
+  - name: publish-on-tag-bitcoind
+    image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
+    pull: if-not-exists
+    privileged: true
+    commands:
+      - |-
+        set -eu
+
+        image='asia-docker.pkg.dev/imtoken-210003/imtoken/bitcoind'
+        short_sha="$(printf %s "$DRONE_COMMIT_SHA" | cut -c1-8)"
+        branch="${DRONE_COMMIT_BRANCH:-${DRONE_BRANCH:-}}"
+        tag_name="${DRONE_TAG:-}"
+        source_branch="${DRONE_SOURCE_BRANCH:-}"
+        source_branch_tag="$(printf %s "$source_branch" | tr "/" "-")"
+        names=""
+
+        add_name() {
+          tag_value="$1"
+          [ -n "$tag_value" ] || return 0
+          names="${names:+$names,}$image:$tag_value"
+        }
+
+        add_name "$short_sha"
+        add_name "$tag_name"
+
+        if [ -z "$names" ]; then
+          echo "no image tags resolved" >&2
+          exit 1
+        fi
+
+        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-tag-bitcoind'
+
+        echo "buildkit dockerfile: Dockerfile"
+        echo "buildkit image names: $names"
+        echo "buildkit cache import: $cache_dir"
+        echo "buildkit cache export: $cache_dir"
+
+        mkdir -p "$cache_dir"
+
+        buildctl \
+          build \
+          --progress plain \
+          --frontend dockerfile.v0 \
+          --local context='.' \
+          --local dockerfile=. \
+          --opt filename='Dockerfile' \
+          --import-cache "type=local,src=$cache_dir" \
+          --export-cache "type=local,dest=$cache_dir,mode=max" \
+          --output "type=image,\"name=$names\",push=true"
+    when:
+      event:
+        - tag
+
+  - name: slack
+    image: plugins/slack
+    settings:
+      template: "{{#if build.pull }}\n*{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}*: <https://github.com/{{ repo.owner }}/{{ repo.name }}/pull/{{ build.pull }}|Pull Request #{{ build.pull }}>\n{{else}}\n*{{#success build.status}}✔{{ else }}✘{{/success}} {{ uppercasefirst build.status }}: Build #{{ build.number }}* (type: `{{ build.event }}`)\n{{/if}}\nCommit: {{ build.message.title }}(<https://github.com/{{ repo.owner }}/{{ repo.name }}/commit/{{ build.commit }}|{{ truncate build.commit 8 }}>)\n{{#if build.tag }}\nTag: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.tag }}|{{ repo.name }} {{ build.tag }}>\n{{else}}\nBranch: <https://github.com/{{ repo.owner }}/{{ repo.name }}/commits/{{ build.branch }}|{{ repo.name }} {{ build.branch }}>\n{{/if}}\nAuthor: {{ build.author }}\n<{{ build.link }}|Visit build page ↗>\n"
+      webhook:
+        from_secret: drone-slack
+    when:
+      status:
+        - success
+        - failure
 ---
 kind: secret
 name: gcp-bucket-sa
@@ -109,8 +261,6 @@ name: gcp-bucket-sa
 get:
   path: drone-gcp-sa-secrets
   name: sa
-
-
 ---
 kind: secret
 name: gcp-server-dev
@@ -118,7 +268,6 @@ name: gcp-server-dev
 get:
   path: drone-kubeconfig-gcp-dev
   name: server
-
 ---
 kind: secret
 name: gcp-token-dev
@@ -126,7 +275,6 @@ name: gcp-token-dev
 get:
   path: drone-kubeconfig-gcp-dev
   name: token
-
 ---
 kind: secret
 name: gcp-server-staging
@@ -134,7 +282,6 @@ name: gcp-server-staging
 get:
   path: drone-kubeconfig-gcp-staging
   name: server
-
 ---
 kind: secret
 name: gcp-token-staging
@@ -142,7 +289,6 @@ name: gcp-token-staging
 get:
   path: drone-kubeconfig-gcp-staging
   name: token
-
 ---
 kind: secret
 name: drone-slack
@@ -150,7 +296,6 @@ name: drone-slack
 get:
   path: drone-slack-secrets
   name: slack_webhook
-
 ---
 kind: secret
 name: mvn-username
@@ -158,7 +303,6 @@ name: mvn-username
 get:
   path: drone-mvn-secrets
   name: username
-
 ---
 kind: secret
 name: mvn-password
