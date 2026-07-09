@@ -31,7 +31,6 @@ steps:
   - name: publish-on-develop-bitcoind
     image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
     pull: if-not-exists
-    privileged: true
     commands:
       - |-
         set -eu
@@ -86,7 +85,6 @@ steps:
   - name: publish-on-release-bitcoind
     image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
     pull: if-not-exists
-    privileged: true
     commands:
       - |-
         set -eu
@@ -139,7 +137,6 @@ steps:
   - name: publish-on-stable-branch-bitcoind
     image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
     pull: if-not-exists
-    privileged: true
     commands:
       - |-
         set -eu
@@ -194,7 +191,6 @@ steps:
   - name: publish-on-tag-bitcoind
     image: asia-docker.pkg.dev/imtoken-210003/imtoken/buildkit
     pull: if-not-exists
-    privileged: true
     commands:
       - |-
         set -eu
