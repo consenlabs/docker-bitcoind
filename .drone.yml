@@ -66,7 +66,7 @@ steps:
 
         mkdir -p "$cache_dir"
 
-        buildctl \
+        set -- \
           build \
           --progress plain \
           --frontend dockerfile.v0 \
@@ -74,8 +74,16 @@ steps:
           --local dockerfile=. \
           --opt filename='Dockerfile' \
           --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max" \
-          --output "type=image,\"name=$names\",push=true"
+          --export-cache "type=local,dest=$cache_dir,mode=max"
+
+        old_ifs=$IFS
+        IFS=,
+        for name in $names; do
+          set -- "$@" --output "type=image,name=$name,push=true"
+        done
+        IFS=$old_ifs
+
+        buildctl "$@"
     when:
       branch:
         - hotfix/*
@@ -120,7 +128,7 @@ steps:
 
         mkdir -p "$cache_dir"
 
-        buildctl \
+        set -- \
           build \
           --progress plain \
           --frontend dockerfile.v0 \
@@ -128,8 +136,16 @@ steps:
           --local dockerfile=. \
           --opt filename='Dockerfile' \
           --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max" \
-          --output "type=image,\"name=$names\",push=true"
+          --export-cache "type=local,dest=$cache_dir,mode=max"
+
+        old_ifs=$IFS
+        IFS=,
+        for name in $names; do
+          set -- "$@" --output "type=image,name=$name,push=true"
+        done
+        IFS=$old_ifs
+
+        buildctl "$@"
     when:
       branch:
         - release/*
@@ -173,7 +189,7 @@ steps:
 
         mkdir -p "$cache_dir"
 
-        buildctl \
+        set -- \
           build \
           --progress plain \
           --frontend dockerfile.v0 \
@@ -181,8 +197,16 @@ steps:
           --local dockerfile=. \
           --opt filename='Dockerfile' \
           --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max" \
-          --output "type=image,\"name=$names\",push=true"
+          --export-cache "type=local,dest=$cache_dir,mode=max"
+
+        old_ifs=$IFS
+        IFS=,
+        for name in $names; do
+          set -- "$@" --output "type=image,name=$name,push=true"
+        done
+        IFS=$old_ifs
+
+        buildctl "$@"
     when:
       branch:
         - develop
@@ -226,7 +250,7 @@ steps:
 
         mkdir -p "$cache_dir"
 
-        buildctl \
+        set -- \
           build \
           --progress plain \
           --frontend dockerfile.v0 \
@@ -234,8 +258,16 @@ steps:
           --local dockerfile=. \
           --opt filename='Dockerfile' \
           --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max" \
-          --output "type=image,\"name=$names\",push=true"
+          --export-cache "type=local,dest=$cache_dir,mode=max"
+
+        old_ifs=$IFS
+        IFS=,
+        for name in $names; do
+          set -- "$@" --output "type=image,name=$name,push=true"
+        done
+        IFS=$old_ifs
+
+        buildctl "$@"
     when:
       event:
         - tag
