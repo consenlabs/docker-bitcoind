@@ -57,14 +57,12 @@ steps:
           exit 1
         fi
 
-        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-develop-bitcoind'
+        cache_ref="$image:buildcache"
 
         echo "buildkit dockerfile: Dockerfile"
         echo "buildkit image names: $names"
-        echo "buildkit cache import: $cache_dir"
-        echo "buildkit cache export: $cache_dir"
-
-        mkdir -p "$cache_dir"
+        echo "buildkit cache import: $cache_ref"
+        echo "buildkit cache export: $cache_ref"
 
         set -- \
           build \
@@ -73,8 +71,8 @@ steps:
           --local context='.' \
           --local dockerfile=. \
           --opt filename='Dockerfile' \
-          --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max"
+          --import-cache "type=registry,ref=$cache_ref" \
+          --export-cache "type=registry,ref=$cache_ref,mode=max"
 
         old_ifs=$IFS
         IFS=,
@@ -119,14 +117,12 @@ steps:
           exit 1
         fi
 
-        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-release-bitcoind'
+        cache_ref="$image:buildcache"
 
         echo "buildkit dockerfile: Dockerfile"
         echo "buildkit image names: $names"
-        echo "buildkit cache import: $cache_dir"
-        echo "buildkit cache export: $cache_dir"
-
-        mkdir -p "$cache_dir"
+        echo "buildkit cache import: $cache_ref"
+        echo "buildkit cache export: $cache_ref"
 
         set -- \
           build \
@@ -135,8 +131,8 @@ steps:
           --local context='.' \
           --local dockerfile=. \
           --opt filename='Dockerfile' \
-          --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max"
+          --import-cache "type=registry,ref=$cache_ref" \
+          --export-cache "type=registry,ref=$cache_ref,mode=max"
 
         old_ifs=$IFS
         IFS=,
@@ -180,14 +176,12 @@ steps:
           exit 1
         fi
 
-        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-stable-branch-bitcoind'
+        cache_ref="$image:buildcache"
 
         echo "buildkit dockerfile: Dockerfile"
         echo "buildkit image names: $names"
-        echo "buildkit cache import: $cache_dir"
-        echo "buildkit cache export: $cache_dir"
-
-        mkdir -p "$cache_dir"
+        echo "buildkit cache import: $cache_ref"
+        echo "buildkit cache export: $cache_ref"
 
         set -- \
           build \
@@ -196,8 +190,8 @@ steps:
           --local context='.' \
           --local dockerfile=. \
           --opt filename='Dockerfile' \
-          --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max"
+          --import-cache "type=registry,ref=$cache_ref" \
+          --export-cache "type=registry,ref=$cache_ref,mode=max"
 
         old_ifs=$IFS
         IFS=,
@@ -241,14 +235,12 @@ steps:
           exit 1
         fi
 
-        cache_dir='/fastcache/docker-bitcoind/buildkit-publish-on-tag-bitcoind'
+        cache_ref="$image:buildcache"
 
         echo "buildkit dockerfile: Dockerfile"
         echo "buildkit image names: $names"
-        echo "buildkit cache import: $cache_dir"
-        echo "buildkit cache export: $cache_dir"
-
-        mkdir -p "$cache_dir"
+        echo "buildkit cache import: $cache_ref"
+        echo "buildkit cache export: $cache_ref"
 
         set -- \
           build \
@@ -257,8 +249,8 @@ steps:
           --local context='.' \
           --local dockerfile=. \
           --opt filename='Dockerfile' \
-          --import-cache "type=local,src=$cache_dir" \
-          --export-cache "type=local,dest=$cache_dir,mode=max"
+          --import-cache "type=registry,ref=$cache_ref" \
+          --export-cache "type=registry,ref=$cache_ref,mode=max"
 
         old_ifs=$IFS
         IFS=,
